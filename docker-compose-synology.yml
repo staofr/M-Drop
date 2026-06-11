@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  dumbdrop:
+    image: staofr/msun:mdrop2.1
+    container_name: DumbDrop
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8893:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    volumes:
+      - /volume2/local/dumbdrop:/app/uploads:rw
+      # - /etc/localtime:/etc/localtime:ro  # 可选：同步宿主机的时区
+    environment:
+      # --- 基础配置 ---
+      UPLOAD_DIR: /app/uploads
+      BASE_URL: https://up.mastersun.me
+      DUMBDROP_TITLE: M-Drop
+      
+      # --- 上传限制 ---
+      MAX_FILE_SIZE: 1024
+      AUTO_UPLOAD: "true"
+      
+      # --- 安全设置 ---
+      DUMBDROP_PIN: ""
+      
+      # --- 反向代理安全配置 ---
+      # 因为您使用了外部专属域名，开启反向代理信任是必须的
+      TRUST_PROXY: "true"
+      
+      # --- 消息通知 (Apprise) ---
+      APPRISE_URL: "apprise://212.227.26.56:8001/msun"
+      APPRISE_MESSAGE: "Nouveau fichier téléversé : {filename} ({size})"

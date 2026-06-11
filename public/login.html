@@ -59,7 +59,7 @@
     <div class="login-container">
         <div class="pin-header">
             <h1>{{SITE_TITLE}}</h1>
-            <h2>Enter PIN</h2>
+            <h2>Saisir le code PIN</h2>
         </div>
         <form id="pin-form">
             <!-- PIN inputs will be dynamically added here -->
@@ -68,10 +68,9 @@
     </div>
 
     <script>
-        // Initialize theme
-        const savedTheme = localStorage.getItem('theme') || 
-            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', savedTheme);
+        // Initialize theme to light by default
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
 
         let pinLength = 4;  // Default length, will be updated from server
 
@@ -139,7 +138,7 @@
                     window.location.href = '/';
                 } else {
                     // Show error message
-                    document.getElementById('pin-error').textContent = data.error || 'Authentication failed';
+                    document.getElementById('pin-error').textContent = data.error || 'Échec de l\'authentification';
                     
                     // Determine if it's a lockout scenario
                     const isLockedOut = data.error.includes('Too many PIN verification attempts');
@@ -162,7 +161,7 @@
                 }
             } catch (err) {
                 console.error('Error verifying PIN:', err);
-                document.getElementById('pin-error').textContent = 'Error verifying PIN';
+                document.getElementById('pin-error').textContent = 'Erreur lors de la vérification du code PIN';
             }
         };
 
@@ -216,7 +215,7 @@
         fetch('/api/auth/pin-required')
             .then(response => {
                 if (response.status === 429) {
-                    throw new Error('Too many attempts. Please wait before trying again.');
+                    throw new Error('Trop de tentatives. Veuillez patienter avant de réessayer.');
                 }
                 return response.json();
             })
@@ -231,9 +230,9 @@
             })
             .catch(err => {
                 console.error('Error checking PIN requirement:', err);
-                const errorMessage = err.message === 'Too many attempts. Please wait before trying again.' 
+                const errorMessage = err.message === 'Trop de tentatives. Veuillez patienter avant de réessayer.' 
                     ? err.message 
-                    : 'Error checking PIN requirement';
+                    : 'Erreur lors de la vérification des exigences du code PIN';
                 document.getElementById('pin-error').textContent = errorMessage;
                 // Prevent refresh loop by disabling the PIN input form
                 const pinContainer = document.getElementById('pin-container');
